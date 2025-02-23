@@ -1,0 +1,69 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model UserRole {
+  id        Int    @id @default(autoincrement())
+  role_name String @unique
+  users     User[]
+
+  created_at DateTime @default(now())
+  created_by Int?
+  updated_at DateTime @updatedAt
+  updated_by Int?
+}
+
+model Team {
+  id        Int    @id @default(autoincrement())
+  team_name String
+  users     User[]
+  customers Customer[]
+
+  created_at DateTime @default(now())
+  created_by Int?
+  updated_at DateTime @updatedAt
+  updated_by Int?
+}
+
+model User {
+  id            Int     @id @default(autoincrement())
+  name          String
+  username      String  @unique
+  password      String
+  is_first_login Boolean @default(true)
+  role_id       Int
+  team_id       Int?
+
+  role UserRole @relation(fields: [role_id], references: [id], onDelete: Cascade)
+  team Team?    @relation(fields: [team_id], references: [id], onDelete: SetNull)
+  customers Customer[]
+
+  created_at DateTime @default(now())
+  created_by Int?
+  updated_at DateTime @updatedAt
+  updated_by Int?
+}
+
+model Customer {
+  id            Int    @id @default(autoincrement())
+  full_name     String
+  year_of_birth Int
+  phone_number  String @unique
+  note          String?
+  status        String
+  user_id       Int
+  team_id       Int
+
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  team Team @relation(fields: [team_id], references: [id], onDelete: Cascade)
+
+  created_at DateTime @default(now())
+  created_by Int?
+  updated_at DateTime @updatedAt
+  updated_by Int?
+}
